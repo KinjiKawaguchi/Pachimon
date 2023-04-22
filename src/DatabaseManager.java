@@ -12,18 +12,16 @@ import java.util.List;
 public class DatabaseManager {
     private static final String DB_URL = "jdbc:sqlite:pokemons.db";
 
-    public DatabaseManager() /* throws ClassNotFoundException */ {
+    public DatabaseManager() {
         try {
             Class.forName("org.sqlite.JDBC");
             Connection conn = DriverManager.getConnection(DB_URL);
             if (conn != null) {
-                System.out.println("テーブルを作成");
                 createTables(conn);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -266,6 +264,27 @@ public class DatabaseManager {
         return spells;
     }
 
+    public void displayAllPokemonsName() {
+        String sql = "SELECT id, name FROM pokemons";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+
+            System.out.printf("%-5s %-15s%n", "ID",
+                    "Name");
+            System.out.println(
+                    "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+            while (rs.next()) {
+                System.out.printf("%-5s %-15s%n",
+                        rs.getInt("id"),
+                        rs.getString("name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void displayAllPokemons() {
         String sql = "SELECT pokemons.*, statuses.* FROM pokemons " +
                 "INNER JOIN statuses ON pokemons.status_id = statuses.id";
@@ -327,6 +346,21 @@ public class DatabaseManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public int getLastInsertedPokemonId() {
+        String sql = "SELECT id FROM pokemons ORDER BY id DESC LIMIT 1";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 
     public void close() {

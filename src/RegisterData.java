@@ -1,17 +1,8 @@
 package src;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class RegisterData {
     private static Scanner scanner = new Scanner(System.in);
@@ -62,11 +53,11 @@ public class RegisterData {
         System.out.println("Pokemon registered!");
     }
 
-    private static Pokemon registerReturnNewPokemon() throws SQLException {
+    private static int registerReturnNewPokemon() throws SQLException {
         Pokemon newPokemon = createPokemon();
         databaseManager.addPokemon(newPokemon);
         System.out.println("Pokemon registered!");
-        return newPokemon;
+        return databaseManager.getLastInsertedPokemonId();
     }
 
     private static void registerNewSpell() throws SQLException {
@@ -99,26 +90,27 @@ public class RegisterData {
         }
 
         databaseManager.displayAllPokemonsName();
-        System.out.println(
-                "Enter the evolved Pokemon's ID or -1 if it doesn't have an evolved form or -2 if there are no pokemon that you want to choice:");
+        System.out.println("Enter the evolved Pokemon's ID\n"
+                + "enter -1 if it doesn't have an evolved form\n"
+                + "-2 if you want to register new pokemon");
         int evolvedId = scanner.nextInt();
         scanner.nextLine(); // Clear the newline character
         Pokemon evolved;
         if (evolvedId == -2) {
-            evolved = registerReturnNewPokemon();
-        } else {
-            evolved = evolvedId != -1 ? databaseManager.getPokemon(evolvedId) : null;
+            evolvedId = registerReturnNewPokemon();
         }
+        evolved = evolvedId != -1 ? databaseManager.getPokemon(evolvedId) : null;
         databaseManager.displayAllPokemonsName();
-        System.out.println("Enter the deevolved Pokemon's ID or -1 if it doesn't have an deevolved form or -2 if there are no pokemon that you want to choice:");
+        System.out.println("Enter the deevolved Pokemon's ID\n"
+                + "enter -1 if it doesn't have an deevolved form\n"
+                + "-2 if you want to register new pokemon");
         int devolvedId = scanner.nextInt();
         scanner.nextLine(); // Clear the newline character
         Pokemon devolved;
         if (devolvedId == -2) {
-            devolved = registerReturnNewPokemon();
-        } else {
-            devolved = devolvedId != -1 ? databaseManager.getPokemon(devolvedId) : null;
+            devolvedId = registerReturnNewPokemon();
         }
+        devolved = devolvedId != -1 ? databaseManager.getPokemon(devolvedId) : null;
 
         return new Pokemon(name, type, spells, status, evolved, devolved);
     }
