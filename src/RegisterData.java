@@ -30,9 +30,9 @@ public class RegisterData {
                 } else if (action == 2) {
                     registerNewSpell();
                 } else if (action == 3) {
-                    displayAllRegisteredPokemons();
+                    databaseManager.displayAllPokemons();
                 } else if (action == 4) {
-                    displayAllRegisteredSpells();
+                    databaseManager.displayAllSpells();
                 } else if (action == 5) {
                     break;
                 } else {
@@ -62,20 +62,17 @@ public class RegisterData {
         System.out.println("Pokemon registered!");
     }
 
+    private static Pokemon registerReturnNewPokemon() throws SQLException {
+        Pokemon newPokemon = createPokemon();
+        databaseManager.addPokemon(newPokemon);
+        System.out.println("Pokemon registered!");
+        return newPokemon;
+    }
+
     private static void registerNewSpell() throws SQLException {
         Spell newSpell = createSpell();
         databaseManager.addSpell(newSpell);
         System.out.println("Spell registered!");
-    }
-
-    private static void displayAllRegisteredPokemons() throws SQLException {
-        List<Pokemon> allPokemons = databaseManager.getAllPokemons();
-        allPokemons.forEach(System.out::println);
-    }
-
-    private static void displayAllRegisteredSpells() throws SQLException {
-        List<Spell> allSpells = databaseManager.getAllSpells();
-        allSpells.forEach(System.out::println);
     }
 
     private static Pokemon createPokemon() throws SQLException {
@@ -101,15 +98,27 @@ public class RegisterData {
             spells[i] = allSpells.stream().filter(spell -> spell.getId() == spellId).findFirst().orElse(null);
         }
 
-        System.out.println("Enter the evolved Pokemon's ID or -1 if it doesn't have an evolved form:");
+        databaseManager.displayAllPokemonsName();
+        System.out.println(
+                "Enter the evolved Pokemon's ID or -1 if it doesn't have an evolved form or -2 if there are no pokemon that you want to choice:");
         int evolvedId = scanner.nextInt();
         scanner.nextLine(); // Clear the newline character
-        Pokemon evolved = evolvedId != -1 ? databaseManager.getPokemon(evolvedId) : null;
-
-        System.out.println("Enter the devolved Pokemon's ID or -1 if it doesn't have a devolved form:");
+        Pokemon evolved;
+        if (evolvedId == -2) {
+            evolved = registerReturnNewPokemon();
+        } else {
+            evolved = evolvedId != -1 ? databaseManager.getPokemon(evolvedId) : null;
+        }
+        databaseManager.displayAllPokemonsName();
+        System.out.println("Enter the deevolved Pokemon's ID or -1 if it doesn't have an deevolved form or -2 if there are no pokemon that you want to choice:");
         int devolvedId = scanner.nextInt();
         scanner.nextLine(); // Clear the newline character
-        Pokemon devolved = devolvedId != -1 ? databaseManager.getPokemon(devolvedId) : null;
+        Pokemon devolved;
+        if (devolvedId == -2) {
+            devolved = registerReturnNewPokemon();
+        } else {
+            devolved = devolvedId != -1 ? databaseManager.getPokemon(devolvedId) : null;
+        }
 
         return new Pokemon(name, type, spells, status, evolved, devolved);
     }

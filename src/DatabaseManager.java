@@ -266,6 +266,69 @@ public class DatabaseManager {
         return spells;
     }
 
+    public void displayAllPokemons() {
+        String sql = "SELECT pokemons.*, statuses.* FROM pokemons " +
+                "INNER JOIN statuses ON pokemons.status_id = statuses.id";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+
+            System.out.printf("%-5s %-15s %-15s %-7s %-7s %-11s %-11s %-11s %-8s %-12s %-12s %-12s %-12s %-12s%n", "ID",
+                    "Name", "Type", "XP", "Level", "Status ID", "Evolved ID", "Devolved ID", "Max HP", "Max Attack",
+                    "Max Defence", "Max SpAttack", "Max SpDefence", "Max Speed");
+            System.out.println(
+                    "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+            while (rs.next()) {
+                System.out.printf("%-5d %-15s %-15s %-7.2f %-7d %-11d %-11d %-11d %-8d %-12d %-12d %-12d %-12d %-12d%n",
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("type"),
+                        rs.getDouble("xp"),
+                        rs.getInt("level"),
+                        rs.getInt("status_id"),
+                        rs.getInt("evolved_id"),
+                        rs.getInt("devolved_id"),
+                        rs.getInt("max_hp"),
+                        rs.getInt("max_attack"),
+                        rs.getInt("max_defence"),
+                        rs.getInt("max_spAttack"),
+                        rs.getInt("max_spDefence"),
+                        rs.getInt("max_speed"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void displayAllSpells() {
+        String sql = "SELECT * FROM spells";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+
+            System.out.printf("%-5s %-15s %-15s %-15s %-7s %-9s %-5s %-7s %-25s%n", "ID", "Name", "Type",
+                    "Classification", "Power", "Accuracy", "PP", "Direct", "Description");
+            System.out.println(
+                    "-------------------------------------------------------------------------------------------------------------");
+            while (rs.next()) {
+                System.out.printf("%-5d %-15s %-15s %-15s %-7d %-9d %-5d %-7b %-25s%n",
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("type"),
+                        rs.getString("classification"),
+                        rs.getInt("power"),
+                        rs.getInt("accuracy"),
+                        rs.getInt("pp"),
+                        rs.getBoolean("direct"),
+                        rs.getString("description"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void close() {
         try {
             Connection conn = DriverManager.getConnection(DB_URL);
