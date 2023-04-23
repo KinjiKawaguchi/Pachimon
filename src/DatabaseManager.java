@@ -133,9 +133,14 @@ public class DatabaseManager {
         try (Connection conn = DriverManager.getConnection(DB_URL);
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             for (Spell spell : spells) {
-                pstmt.setInt(1, pokemonId);
-                pstmt.setInt(2, spell.getId());
-                pstmt.executeUpdate();
+                if (spell != null) { // Add this check
+                    pstmt.setInt(1, pokemonId);
+                    pstmt.setInt(2, spell.getId());
+                    pstmt.executeUpdate();
+                } else {
+                    System.out.println("Error: Could not find spell with ID " + spellId);
+                }
+
             }
         }
     }
@@ -350,6 +355,21 @@ public class DatabaseManager {
 
     public int getLastInsertedPokemonId() {
         String sql = "SELECT id FROM pokemons ORDER BY id DESC LIMIT 1";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public int getLastInsertedSpellId() {
+        String sql = "SELECT id FROM spells ORDER BY id DESC LIMIT 1";
 
         try (Connection conn = DriverManager.getConnection(DB_URL);
                 Statement stmt = conn.createStatement();

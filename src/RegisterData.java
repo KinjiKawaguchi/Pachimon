@@ -66,6 +66,13 @@ public class RegisterData {
         System.out.println("Spell registered!");
     }
 
+    private static int registerReturnNewSpell() throws SQLException {
+        Spell newSpell = createSpell();
+        databaseManager.addSpell(newSpell);
+        System.out.println("Spell registered");
+        return databaseManager.getLastInsertedSpellId();
+    }
+
     private static Pokemon createPokemon() throws SQLException {
         System.out.println("Enter the Pokemon's name:");
         String name = scanner.nextLine();
@@ -79,13 +86,19 @@ public class RegisterData {
                 scanner.nextInt(), scanner.nextInt());
         scanner.nextLine(); // Clear the newline character
 
-        System.out.println("Choose the Pokemon's spells (enter the spell IDs separated by a space):");
+        System.out.println("Choose the Pokemon's spells (enter the spell IDs separated by a space)\n"
+                + "-2 if you want to register new spell");
         List<Spell> allSpells = databaseManager.getAllSpells();
         allSpells.forEach(spell -> System.out.println(spell.getId() + ": " + spell.getName()));
         String[] spellIds = scanner.nextLine().split(" ");
         Spell[] spells = new Spell[spellIds.length];
         for (int i = 0; i < spellIds.length; i++) {
-            int spellId = Integer.parseInt(spellIds[i]);
+            int spellId;
+            if (Integer.parseInt(spellIds[i]) == -2) {
+                spellId = registerReturnNewSpell();
+            } else {
+                spellId = Integer.parseInt(spellIds[i]);
+            }
             spells[i] = allSpells.stream().filter(spell -> spell.getId() == spellId).findFirst().orElse(null);
         }
 
