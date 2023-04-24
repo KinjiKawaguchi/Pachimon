@@ -96,6 +96,7 @@ public class RegisterData {
             int spellId;
             if (Integer.parseInt(spellIds[i]) == -2) {
                 spellId = registerReturnNewSpell();
+                allSpells = databaseManager.getAllSpells();
             } else {
                 spellId = Integer.parseInt(spellIds[i]);
             }

@@ -138,7 +138,7 @@ public class DatabaseManager {
                     pstmt.setInt(2, spell.getId());
                     pstmt.executeUpdate();
                 } else {
-                    System.out.println("Error: Could not find spell with ID " + spellId);
+                    System.out.println("Error: Could not find spell with ID ");
                 }
 
             }
@@ -375,6 +375,7 @@ public class DatabaseManager {
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(sql)) {
             if (rs.next()) {
+                System.out.println("registered at "+ rs.getInt("id"));
                 return rs.getInt("id");
             }
         } catch (SQLException e) {
