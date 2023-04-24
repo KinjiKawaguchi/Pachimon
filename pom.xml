@@ -1,0 +1,7 @@
+<dependencies>
+    <dependency>
+        <groupId>org.xerial</groupId>
+        <artifactId>sqlite-jdbc</artifactId>
+        <version>4.41.2.1</version>
+    </dependency>
+</dependencies>
