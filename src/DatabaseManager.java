@@ -383,13 +383,12 @@ public class DatabaseManager {
         return -1;
     }
 
-    
     public void setPokemonData(Pokemon pokemon, int id) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 
         String sql = "UPDATE pokemons SET name = ?, type = ?, status_id = ?, evolved_id = ?, devolved_id = ? WHERE id = ?";
-    
+
         try {
             connection = DriverManager.getConnection(DB_URL);
             preparedStatement = connection.prepareStatement(sql);
@@ -402,7 +401,7 @@ public class DatabaseManager {
             preparedStatement.setInt(6, id);
             preparedStatement.executeUpdate();
 
-            addPokemonSpells(id, pokemon.getSpell());
+            setPokemonSpells(id, pokemon.getSpell());
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         } finally {
@@ -419,23 +418,21 @@ public class DatabaseManager {
         }
     }
 
-
-private void setPokemonSpells(int pokemonId, Spell[] spells) throws SQLException {
-String sql = "UPDATE pokemon_spells set(pokemon_id, spell_id) VALUES (?, ?)";
-try (Connection conn = DriverManager.getConnection(DB_URL);
-        PreparedStatement pstmt = conn.prepareStatement(sql)) {
-    for (Spell spell : spells) {
-        if (spell != null) { // Add this check
-            pstmt.setInt(1, pokemonId);
-            pstmt.setInt(2, spell.getId());
-            pstmt.executeUpdate();
-        } else {
-            System.out.println("Error: Could not find spell with ID ");
+    private void setPokemonSpells(int pokemonId, Spell[] spells) throws SQLException {
+        String sql = "UPDATE pokemon_spells set spell_id = ? WHERE pokemon_id";
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            for (Spell spell : spells) {
+                if (spell != null) { // Add this check
+                    pstmt.setInt(1, pokemonId);
+                    pstmt.setInt(2, spell.getId());
+                    pstmt.executeUpdate();
+                } else {
+                    System.out.println("Error: Could not find spell with ID ");
+                }
+            }
         }
     }
-}
-}
-    
 
     public void setSpellData(Spell spell, int id) {
         Connection connection = null;
@@ -446,7 +443,7 @@ try (Connection conn = DriverManager.getConnection(DB_URL);
         try {
             connection = DriverManager.getConnection(DB_URL);
             preparedStatement = connection.prepareStatement(sql);
-            
+
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, spell.getName());
             preparedStatement.setString(2, spell.getType());
