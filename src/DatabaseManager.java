@@ -140,7 +140,6 @@ public class DatabaseManager {
                 } else {
                     System.out.println("Error: Could not find spell with ID ");
                 }
-
             }
         }
     }
@@ -375,13 +374,191 @@ public class DatabaseManager {
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(sql)) {
             if (rs.next()) {
-                System.out.println("registered at "+ rs.getInt("id"));
+                System.out.println("registered at " + rs.getInt("id"));
                 return rs.getInt("id");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return -1;
+    }
+
+    
+    public void setPokemonData(Pokemon pokemon, int id) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        String sql = "UPDATE pokemons SET name = ?, type = ?, status_id = ?, evolved_id = ?, devolved_id = ? WHERE id = ?";
+    
+        try {
+            connection = DriverManager.getConnection(DB_URL);
+            preparedStatement = connection.prepareStatement(sql);
+            System.out.println("Debug flag" + pokemon.getName());
+            preparedStatement.setString(1, pokemon.getName());
+            preparedStatement.setString(2, pokemon.getType());
+            preparedStatement.setInt(3, addStatus(pokemon.getStatus()));
+            preparedStatement.setInt(4, pokemon.getEvolved() == null ? -1 : pokemon.getEvolved().getId());
+            preparedStatement.setInt(5, pokemon.getDevolved() == null ? -1 : pokemon.getDevolved().getId());
+            preparedStatement.setInt(6, id);
+            preparedStatement.executeUpdate();
+
+            addPokemonSpells(id, pokemon.getSpell());
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            try {
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+
+private void setPokemonSpells(int pokemonId, Spell[] spells) throws SQLException {
+String sql = "UPDATE pokemon_spells set(pokemon_id, spell_id) VALUES (?, ?)";
+try (Connection conn = DriverManager.getConnection(DB_URL);
+        PreparedStatement pstmt = conn.prepareStatement(sql)) {
+    for (Spell spell : spells) {
+        if (spell != null) { // Add this check
+            pstmt.setInt(1, pokemonId);
+            pstmt.setInt(2, spell.getId());
+            pstmt.executeUpdate();
+        } else {
+            System.out.println("Error: Could not find spell with ID ");
+        }
+    }
+}
+}
+    
+
+    public void setSpellData(Spell spell, int id) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        String sql = "UPDATE spells SET name = ?, type = ?, classification = ?, power = ?, accuracy = ?, pp = ?, is_direct = ?, description = ? WHERE id = ?";
+
+        try {
+            connection = DriverManager.getConnection(DB_URL);
+            preparedStatement = connection.prepareStatement(sql);
+            
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, spell.getName());
+            preparedStatement.setString(2, spell.getType());
+            preparedStatement.setString(3, spell.getClassification());
+            preparedStatement.setInt(4, spell.getPower());
+            preparedStatement.setInt(5, spell.getAccuracy());
+            preparedStatement.setInt(6, spell.getPp());
+            preparedStatement.setBoolean(7, spell.isDirect());
+            preparedStatement.setString(8, spell.getDescription());
+            preparedStatement.setInt(9, id);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            try {
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    public void deletePokemonData(int pokemonId) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            connection = DriverManager.getConnection(DB_URL);
+
+            // 進化ポケモンの外部キーを解除
+            String updateEvolvedIdQuery = "UPDATE pokemons SET evolved_id = -1 WHERE evolved_id = ?";
+            preparedStatement = connection.prepareStatement(updateEvolvedIdQuery);
+            preparedStatement.setInt(1, pokemonId);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+
+            // 後退ポケモンの外部キーを解除
+            String updateDeevolvedIdQuery = "UPDATE pokemons SET deevolved_id = -1 WHERE deevolved_id = ?";
+            preparedStatement = connection.prepareStatement(updateDeevolvedIdQuery);
+            preparedStatement.setInt(1, pokemonId);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+
+            // ポケモンデータを削除
+            String deletePokemonQuery = "DELETE FROM pokemons WHERE id = ?";
+            preparedStatement = connection.prepareStatement(deletePokemonQuery);
+            preparedStatement.setInt(1, pokemonId);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+
+            // Statusデータを削除
+            String deleteStatusQuery = "DELETE FROM statuses WHERE pokemon_id = ?";
+            preparedStatement = connection.prepareStatement(deleteStatusQuery);
+            preparedStatement.setInt(1, pokemonId);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            try {
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    public void deleteSpellData(int spellId) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            connection = DriverManager.getConnection(DB_URL);
+
+            // 中間テーブルの外部キーを解除
+            String deletePokemonSpellQuery = "DELETE FROM pokemon_spells WHERE spell_id = ?";
+            preparedStatement = connection.prepareStatement(deletePokemonSpellQuery);
+            preparedStatement.setInt(1, spellId);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+
+            // Spellデータを削除
+            String deleteSpellQuery = "DELETE FROM spells WHERE id = ?";
+            preparedStatement = connection.prepareStatement(deleteSpellQuery);
+            preparedStatement.setInt(1, spellId);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            try {
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+        }
     }
 
     public void close() {

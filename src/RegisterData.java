@@ -10,24 +10,41 @@ public class RegisterData {
 
     public static void main(String[] args) {
         try {
-            while (true) {
+            MENU: while (true) {
                 displayMenu();
 
                 int action = scanner.nextInt();
                 scanner.nextLine(); // Clear the newline character
 
-                if (action == 1) {
-                    registerNewPokemon();
-                } else if (action == 2) {
-                    registerNewSpell();
-                } else if (action == 3) {
-                    databaseManager.displayAllPokemons();
-                } else if (action == 4) {
-                    databaseManager.displayAllSpells();
-                } else if (action == 5) {
-                    break;
-                } else {
-                    System.out.println("Invalid action! Please try again.");
+                switch(action){
+                    case 1:
+                        registerNewPokemon();
+                        break;
+                    case 2:
+                        registerNewSpell();
+                        break;
+                    case 3:
+                        databaseManager.displayAllPokemons();
+                        break;
+                    case 4:
+                        databaseManager.displayAllSpells();
+                        break;
+                    case 5:
+                        updatePokemonData();
+                        break;
+                    case 6:
+                        updateSpellData();
+                        break;
+                    case 7:
+                        deletePokemonData();
+                        break;
+                    case 8:
+                        deleteSpllData();
+                        break;
+                    case 9:
+                        break MENU;
+                    default:
+                        System.out.println("Invalid action! Please try again.");
                 }
             }
 
@@ -44,7 +61,11 @@ public class RegisterData {
         System.out.println("2. Register a new Spell");
         System.out.println("3. Display all registered Pokemons");
         System.out.println("4. Display all registered Spells");
-        System.out.println("5. Exit");
+        System.out.println("5. Change Pokemon data");
+        System.out.println("6. Change spell data");
+        System.out.println("7. Delete Pokemon data");
+        System.out.println("8. Delete spell data");
+        System.out.println("9. Exit");
     }
 
     private static void registerNewPokemon() throws SQLException {
@@ -156,5 +177,39 @@ public class RegisterData {
         String description = scanner.nextLine();
 
         return new Spell(name, type, classification, power, accuracy, pp, direct, description);
+    }
+
+    public static void updatePokemonData() throws SQLException{
+        databaseManager.displayAllPokemons();
+        System.out.println("Select Pokemon that you want to change");
+        int selectedId = scanner.nextInt();
+        scanner.nextLine(); // Clear the newline character
+        Pokemon updatedPokemon = createPokemon();
+        databaseManager.setPokemonData(updatedPokemon,selectedId);
+    } 
+
+    public static void updateSpellData(){
+        databaseManager.displayAllSpells();
+        System.out.println("Select Pokemon that you want to change");
+        int selectedId = scanner.nextInt();
+        scanner.nextLine();
+        Spell updatedSpell = createSpell();
+        databaseManager.setSpellData(updatedSpell, selectedId);
+    }
+
+    public static void deletePokemonData(){
+        databaseManager.displayAllPokemons();
+        System.out.println("Select Pokemon that you want to delete");
+        int deletePokemonId = scanner.nextInt();
+        scanner.nextLine();
+        databaseManager.deletePokemonData(deletePokemonId);
+    }
+
+    public static void deleteSpllData(){
+        databaseManager.displayAllSpells();
+        System.out.println("Select Spell that you want to delete");
+        int deleteSpellData = scanner.nextInt();
+        scanner.nextLine();
+        databaseManager.deleteSpellData(deleteSpellData);
     }
 }
